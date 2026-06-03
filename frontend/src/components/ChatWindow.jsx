@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   Send, 
   Bot, 
@@ -92,7 +94,53 @@ const ChatWindow = ({ selectedDoc, messages, onSendMessage, isLoading }) => {
                     ? 'bg-primary-600 text-white rounded-tr-none'
                     : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
                 }`}>
-                  {msg.content}
+                  {msg.role === 'assistant' ? (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ ...props }) => <h1 className="text-xl font-bold text-white mb-3 mt-2" {...props} />,
+                        h2: ({ ...props }) => <h2 className="text-lg font-bold text-white mb-2 mt-2" {...props} />,
+                        h3: ({ ...props }) => <h3 className="text-base font-bold text-white mb-2 mt-2" {...props} />,
+                        h4: ({ ...props }) => <h4 className="text-sm font-bold text-white mb-1 mt-1" {...props} />,
+                        p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({ ...props }) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
+                        ol: ({ ...props }) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
+                        li: ({ ...props }) => <li className="text-slate-200" {...props} />,
+                        strong: ({ ...props }) => <strong className="text-white font-semibold" {...props} />,
+                        em: ({ ...props }) => <em className="text-slate-300 italic" {...props} />,
+                        code: ({ ...props }) => (
+                          <code className="bg-slate-800 text-primary-300 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
+                        ),
+                        pre: ({ ...props }) => (
+                          <pre className="bg-slate-800 p-3 rounded-lg overflow-x-auto mb-2" {...props} />
+                        ),
+                        blockquote: ({ ...props }) => (
+                          <blockquote className="border-l-4 border-primary-500 pl-3 py-1 my-2 text-slate-400 italic" {...props} />
+                        ),
+                        a: ({ ...props }) => (
+                          <a className="text-primary-400 hover:text-primary-300 underline" target="_blank" rel="noopener noreferrer" {...props} />
+                        ),
+                        table: ({ ...props }) => (
+                          <div className="overflow-x-auto mb-2">
+                            <table className="min-w-full divide-y divide-slate-700" {...props} />
+                          </div>
+                        ),
+                        thead: ({ ...props }) => <thead className="bg-slate-800" {...props} />,
+                        tbody: ({ ...props }) => <tbody className="divide-y divide-slate-700" {...props} />,
+                        tr: ({ ...props }) => <tr {...props} />,
+                        th: ({ ...props }) => (
+                          <th className="px-3 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider" {...props} />
+                        ),
+                        td: ({ ...props }) => (
+                          <td className="px-3 py-2 text-sm text-slate-300 whitespace-nowrap" {...props} />
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
                 <span className="text-[10px] text-slate-600 font-medium px-1 uppercase tracking-tighter">
                   {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}

@@ -48,14 +48,21 @@ class PineconeService:
 You are a high precision enterprise document assistant.
 
 Rules:
+
 1. Answer only from uploaded document.
-2. Search headers, footers, notes, appendix, tiny text.
+2. Search headers, footers, notes, appendix, tables and tiny text.
 3. Important answers may appear only once.
 4. Never guess.
-5. If not found, say Not found in document.
-6. Give same answer for repeated same query.
-7. Prefer exact wording.
-8. Be concise and accurate.
+5. If information is not present, respond exactly:
+   Not found in document.
+6. Give consistent answers for repeated queries.
+7. Prefer exact wording from the document whenever possible.
+8. Answer with the level of detail supported by the document.
+9. For simple factual questions, provide a concise answer.
+10. For explanatory, technical, procedural, policy, workflow or process-related questions, provide a detailed answer using all relevant information available.
+11. Include important limitations, exceptions, notes and conditions when present in the document.
+12. Do not omit relevant information that helps fully answer the question.
+13. Never add information that is not present in the document.
 """
             )
 
@@ -250,13 +257,21 @@ Answer using uploaded document only.
 Question:
 {question}
 
-Rules:
+Instructions:
+
 1. Search all retrieved context carefully.
-2. Search headers, tables, notes, appendix, tiny text.
-3. Prefer exact wording.
-4. If answer exists once, return it.
-5. If truly absent say: Not found in document.
-6. Do not guess.
+2. Search headers, footers, tables, notes, appendix and small text.
+3. Use only information found in the uploaded document.
+4. Never guess or infer information that is not explicitly supported by the document.
+5. If the answer is not present in the document, respond exactly:
+   Not found in document.
+6. Preserve factual accuracy.
+7. Prefer exact wording from the document whenever appropriate.
+8. For short factual questions, provide a short direct answer.
+9. For explanatory, procedural, policy, workflow, technical or multi-part questions, provide a complete answer using all relevant information found.
+10. Include relevant limitations, exceptions, conditions and notes when available in the document.
+11. Do not omit important details that help fully answer the question.
+12. Do not add information from outside the uploaded document.
 """
 
             # ==================================
@@ -281,6 +296,32 @@ Rules:
                     "queries": expanded_queries
                 }
             )
+
+            
+            try:
+                if hasattr(response, "citations"):
+                    service_logger.info(
+                        f"Retrieved citations count: {len(response.citations)}"
+                    )
+
+                    service_logger.debug(
+                        f"Citations: {response.citations}"
+                    )
+
+                if hasattr(response, "highlights"):
+                    service_logger.info(
+                        f"Retrieved highlights count: {len(response.highlights)}"
+                    )
+
+                    service_logger.debug(
+                        f"Highlights: {response.highlights}"
+                    )
+
+            except Exception as e:
+                service_logger.debug(
+                    f"Unable to inspect retrieval metadata: {str(e)}"
+                )
+
 
             answer = self._extract_answer(response)
 
